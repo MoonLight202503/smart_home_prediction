@@ -13,6 +13,7 @@ import torch.optim as optim
 import pandas as pd
 import numpy as np
 import os
+import pytz
 from datetime import datetime, timedelta
 from supabase import create_client, Client
 
@@ -102,23 +103,28 @@ def train_model(df: pd.DataFrame):
     return model, X_t, max_val
 
 
-# ── 5. 24시간 롤링 예측 ────────────────────────────────
-def predict_24h(model: LSTMModel, df: pd.DataFrame, X_t: torch.Tensor, max_val: float):
-    print("\n🔮 24시간 일사량 예측 중...")
+# ── 5. 내일 24시간 롤링 예측 ───────────────────────────
+def predict_24h(model: LSTMModel, X_t: torch.Tensor, max_val: float):
+    print("\n🔮 내일 24시간 일사량 예측 중...")
     model.eval()
 
-    last_time = df['datetime'].max().replace(minute=0, second=0, microsecond=0)
-    window    = X_t[-1].squeeze(-1).tolist()
+    # 항상 오늘 기준 내일 00시~23시 예측
+    kst      = pytz.timezone('Asia/Seoul')
+    today    = datetime.now(kst).replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+
+    window      = X_t[-1].squeeze(-1).tolist()
     predictions = []
 
     with torch.no_grad():
         for hour in range(24):
-            pred_time = last_time + timedelta(hours=hour + 1)
+            pred_time = tomorrow + timedelta(hours=hour)
             x_input   = torch.tensor(window[-SEQ_LENGTH:],
                                      dtype=torch.float32).unsqueeze(0).unsqueeze(-1)
             pred_norm = model(x_input).item()
             pred      = max(pred_norm * max_val, 0.0)
 
+            # 밤 시간대(6시 이전, 19시 이후) 강제 0
             if pred_time.hour < 6 or pred_time.hour > 18:
                 pred = 0.0
 
@@ -192,13 +198,14 @@ def print_results(records: list):
 # ── 메인 ──────────────────────────────────────────────
 def main():
     print("🌤 전력 소비량 예측 시스템 시작\n")
-    df          = load_data()
+    df               = load_data()
     model, X_t, max_val = train_model(df)
-    predictions = predict_24h(model, df, X_t, max_val)
-    records     = save_to_supabase(predictions)
+    predictions      = predict_24h(model, X_t, max_val)
+    records          = save_to_supabase(predictions)
     print_results(records)
     print("\n✅ 전체 프로세스 완료")
 
 
 if __name__ == "__main__":
     main()
+
