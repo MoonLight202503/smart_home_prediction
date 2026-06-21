@@ -33,7 +33,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ── 1. 데이터 로드 ─────────────────────────────────────
 def load_data() -> pd.DataFrame:
     print("📥 Supabase에서 데이터 로드 중...")
-    resp = supabase.table("r_weather_data").select("*").order("r_timestamp").execute()
+    resp = supabase.table("r_weather_data").select("*").order("r_timestamp").limit(100000).execute()
     df   = pd.DataFrame(resp.data)
 
     if df.empty:
