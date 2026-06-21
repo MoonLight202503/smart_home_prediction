@@ -156,7 +156,7 @@ def save_to_supabase(predictions: list) -> list:
         {
             "predicted_time":  pred_time.isoformat(),
             "pred_insolation": round(float(insolation), 4),
-            "pred_power":      calculate_power(insolation),
+            "pred_power":      float(calculate_power(insolation)),
             "timestamp":       datetime.now().isoformat(),
         }
         for pred_time, insolation in predictions
