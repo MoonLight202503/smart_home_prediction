@@ -124,8 +124,8 @@ def predict_24h(model: LSTMModel, X_t: torch.Tensor, max_val: float):
             pred_norm = model(x_input).item()
             pred      = max(pred_norm * max_val, 0.0)
 
-            # 밤 시간대(6시 이전, 19시 이후) 강제 0
-            if pred_time.hour < 6 or pred_time.hour > 18:
+            # 밤 시간대(6시 이전, 20시 이후) 강제 0
+            if pred_time.hour < 6 or pred_time.hour > 20:
                 pred = 0.0
 
             predictions.append((pred_time, pred))
