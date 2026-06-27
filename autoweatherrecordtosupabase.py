@@ -11,7 +11,7 @@ import pytz
 from supabase import create_client, Client
 
 # ── 설정 ──────────────────────────────────────────────
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://kptdgruwsblwhokwiawf.supabase.co")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 KMA_API_KEY  = os.environ.get("KMA_API_KEY")
 STN          = 108  # 서울
