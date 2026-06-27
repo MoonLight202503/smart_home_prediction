@@ -3,7 +3,7 @@ name: Collect Weather Data (Every Hour)
 
 on:
   schedule:
-    - cron: "0 * * * *"  # 매시간 정각 (UTC) = KST 매시간 정각
+    - cron: "5 * * * *"  # 매시간 5분 후 (UTC) = KST 매시간 5분 후
   workflow_dispatch:
 
 jobs:
